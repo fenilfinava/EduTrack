@@ -64,15 +64,21 @@ export default function RegisterPage() {
         // Store selected role in sessionStorage for callback to use
         sessionStorage.setItem('signup_role', selectedRole)
 
-        const { error } = await supabase.auth.signInWithOAuth({
-            provider: 'github',
-            options: {
-                redirectTo: `${window.location.origin}/callback`
-            }
-        })
+        try {
+            // Construct the OAuth URL directly - bypasses SDK which seems to hang
+            const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+            const redirectTo = `${window.location.origin}/callback`
 
-        if (error) {
-            setError(error.message)
+            if (!supabaseUrl) {
+                throw new Error('Supabase URL not configured')
+            }
+
+            // Direct redirect to Supabase OAuth endpoint
+            const authUrl = `${supabaseUrl}/auth/v1/authorize?provider=github&redirect_to=${encodeURIComponent(redirectTo)}`
+            window.location.href = authUrl
+        } catch (err) {
+            const message = err instanceof Error ? err.message : 'GitHub login failed'
+            setError(message)
             setIsLoading(false)
         }
     }
@@ -143,8 +149,8 @@ export default function RegisterPage() {
                                         onClick={() => setSelectedRole(role.value)}
                                         disabled={isLoading}
                                         className={`p-3 rounded-lg border-2 transition-all flex flex-col items-center gap-1 ${isSelected
-                                                ? `${role.borderColor} ${role.bgColor}`
-                                                : 'border-border/50 hover:border-border'
+                                            ? `${role.borderColor} ${role.bgColor}`
+                                            : 'border-border/50 hover:border-border'
                                             }`}
                                     >
                                         <Icon className={`h-5 w-5 ${isSelected ? role.color : 'text-muted-foreground'}`} />

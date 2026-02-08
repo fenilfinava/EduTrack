@@ -27,15 +27,21 @@ export default function LoginPage() {
         setIsLoading(true)
         setError(null)
 
-        const { error } = await supabase.auth.signInWithOAuth({
-            provider: 'github',
-            options: {
-                redirectTo: `${window.location.origin}/callback`
-            }
-        })
+        try {
+            // Construct the OAuth URL directly - bypasses SDK which seems to hang
+            const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+            const redirectTo = `${window.location.origin}/callback`
 
-        if (error) {
-            setError(error.message)
+            if (!supabaseUrl) {
+                throw new Error('Supabase URL not configured')
+            }
+
+            // Direct redirect to Supabase OAuth endpoint
+            const authUrl = `${supabaseUrl}/auth/v1/authorize?provider=github&redirect_to=${encodeURIComponent(redirectTo)}`
+            window.location.href = authUrl
+        } catch (err) {
+            const message = err instanceof Error ? err.message : 'GitHub login failed'
+            setError(message)
             setIsLoading(false)
         }
     }
