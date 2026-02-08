@@ -1,0 +1,128 @@
+@import "tailwindcss";
+
+@plugin "tailwindcss-animate";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  /* Default Dark Mode (Neo-Dark) */
+  --background: 0 0% 5%; /* #0D0D0D */
+  --foreground: 0 0% 100%; /* #FFFFFF */
+  --card: 0 0% 11%; /* #1C1C1C */
+  --card-foreground: 0 0% 100%; /* #FFFFFF */
+  --popover: 0 0% 11%; /* #1C1C1C */
+  --popover-foreground: 0 0% 100%; /* #FFFFFF */
+  --primary: 0 0% 100%; /* White for primary text/actions in dark mode */
+  --primary-foreground: 0 0% 5%; /* Dark text on white primary */
+  --secondary: 0 0% 14%; /* Slightly lighter than background */
+  --secondary-foreground: 0 0% 100%;
+  --muted: 0 0% 14%;
+  --muted-foreground: 0 0% 63%; /* #A0A0A0 */
+  --accent: 0 0% 14%;
+  --accent-foreground: 0 0% 100%;
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 0 0% 14%; /* Subtle border if needed, but we aim for borderless */
+  --input: 0 0% 14%;
+  --ring: 0 0% 100%;
+  --radius: 1.75rem; /* 28px */
+  
+  /* Custom Accents */
+  --accent-lime: 84 71% 65%; /* #B4E666 */
+  --accent-orange: 29 100% 63%; /* #FF9F43 */
+  --accent-blue: 217 89% 61%; /* #4285F4 */
+}
+
+/* Light Mode Override (when .light class is present) */
+.light {
+  --background: 216 20% 97%; /* #F5F7FA */
+  --foreground: 0 0% 10%; /* #1A1A1A */
+  --card: 0 0% 100%; /* #FFFFFF */
+  --card-foreground: 0 0% 10%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 0 0% 10%;
+  --primary: 0 0% 10%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 210 40% 96.1%;
+  --secondary-foreground: 0 0% 10%;
+  --muted: 210 40% 96.1%;
+  --muted-foreground: 0 0% 40%; /* #666666 */
+  --accent: 210 40% 96.1%;
+  --accent-foreground: 0 0% 10%;
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 0 0% 98%;
+  --border: 214.3 31.8% 91.4%;
+  --input: 214.3 31.8% 91.4%;
+  --ring: 0 0% 10%;
+}
+
+/* Ensure dark selection is handled if system preference is used, 
+   but we want default dark. 
+   We will rely on <html class="dark"> or just root variables being dark by default.
+   The .dark class below is redundant if :root is already dark, 
+   but kept for compatibility if something toggles strictly .dark/.light 
+*/
+.dark {
+  /* Same as :root default */
+  --background: 0 0% 5%;
+  --foreground: 0 0% 100%;
+  --card: 0 0% 11%;
+  --card-foreground: 0 0% 100%;
+  --popover: 0 0% 11%;
+  --popover-foreground: 0 0% 100%;
+  --primary: 0 0% 100%;
+  --primary-foreground: 0 0% 5%;
+  --secondary: 0 0% 14%;
+  --secondary-foreground: 0 0% 100%;
+  --muted: 0 0% 14%;
+  --muted-foreground: 0 0% 63%;
+  --accent: 0 0% 14%;
+  --accent-foreground: 0 0% 100%;
+  --destructive: 0 62.8% 30.6%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 0 0% 14%;
+  --input: 0 0% 14%;
+  --ring: 0 0% 100%;
+}
+
+@theme inline {
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+  
+  --color-accent-lime: hsl(var(--accent-lime));
+  --color-accent-orange: hsl(var(--accent-orange));
+  --color-accent-blue: hsl(var(--accent-blue));
+
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 4px);
+  
+  --font-sans: var(--font-inter); 
+  --font-heading: var(--font-oswald);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+  }
+}
