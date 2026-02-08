@@ -3,28 +3,36 @@ import { createClient, SupabaseClient } from '@supabase/supabase-js';
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 
-// Simple singleton pattern - initializes on first import in browser
+// Singleton instance - initialized lazily
 let supabaseInstance: SupabaseClient | null = null;
 
-function getSupabaseClient(): SupabaseClient {
-    if (supabaseInstance) {
-        return supabaseInstance;
-    }
-
+function createSupabaseClient(): SupabaseClient {
     if (!supabaseUrl || !supabaseAnonKey) {
         throw new Error('Supabase environment variables are not configured');
     }
 
-    supabaseInstance = createClient(supabaseUrl, supabaseAnonKey, {
+    return createClient(supabaseUrl, supabaseAnonKey, {
         auth: {
             autoRefreshToken: true,
             persistSession: true,
             detectSessionInUrl: true,
         }
     });
-
-    return supabaseInstance;
 }
 
-// Export the client directly for browser usage
-export const supabase = typeof window !== 'undefined' ? getSupabaseClient() : ({} as SupabaseClient);
+// Use a getter pattern for lazy initialization
+// This ensures the client is only created when actually accessed
+export const supabase = new Proxy({} as SupabaseClient, {
+    get(_, prop) {
+        if (!supabaseInstance) {
+            supabaseInstance = createSupabaseClient();
+        }
+        const value = (supabaseInstance as unknown as Record<string | symbol, unknown>)[prop];
+        // Bind functions to the instance to preserve 'this' context
+        if (typeof value === 'function') {
+            return value.bind(supabaseInstance);
+        }
+        return value;
+    }
+});
+
