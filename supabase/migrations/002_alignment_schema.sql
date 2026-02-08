@@ -63,3 +63,39 @@ CREATE POLICY "Mentors can update their own evaluations" ON evaluations FOR UPDA
 CREATE INDEX IF NOT EXISTS idx_audit_logs_created_at ON audit_logs(created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_evaluations_student_id ON evaluations(student_id);
 CREATE INDEX IF NOT EXISTS idx_evaluations_project_id ON evaluations(project_id);
+
+-- ============================================
+-- 7. TEAMS TABLE
+-- ============================================
+CREATE TABLE IF NOT EXISTS teams (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    name TEXT NOT NULL,
+    mentor_id UUID REFERENCES profiles(id) ON DELETE SET NULL,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ============================================
+-- 8. TEAM MEMBERS TABLE
+-- ============================================
+CREATE TABLE IF NOT EXISTS team_members (
+    team_id UUID REFERENCES teams(id) ON DELETE CASCADE,
+    user_id UUID REFERENCES profiles(id) ON DELETE CASCADE,
+    joined_at TIMESTAMPTZ DEFAULT NOW(),
+    PRIMARY KEY (team_id, user_id)
+);
+
+-- ============================================
+-- 9. ADD TEAM_ID TO PROJECTS
+-- ============================================
+ALTER TABLE projects ADD COLUMN IF NOT EXISTS team_id UUID REFERENCES teams(id) ON DELETE SET NULL;
+
+-- ============================================
+-- 10. INDEXES FOR TEAMS
+-- ============================================
+CREATE INDEX IF NOT EXISTS idx_projects_team_id ON projects(team_id);
+CREATE INDEX IF NOT EXISTS idx_team_members_user_id ON team_members(user_id);
+CREATE INDEX IF NOT EXISTS idx_teams_mentor_id ON teams(mentor_id);
+
+-- Apply updated_at trigger to teams
+CREATE TRIGGER update_teams_updated_at BEFORE UPDATE ON teams FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
