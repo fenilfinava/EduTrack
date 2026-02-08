@@ -1,17 +1,13 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-// Singleton instance - initialized lazily
-let supabaseInstance: SupabaseClient | null = null;
+// Create client directly - will be null during build if env vars missing
+let supabaseClient: SupabaseClient | null = null;
 
-function createSupabaseClient(): SupabaseClient {
-    if (!supabaseUrl || !supabaseAnonKey) {
-        throw new Error('Supabase environment variables are not configured');
-    }
-
-    return createClient(supabaseUrl, supabaseAnonKey, {
+if (supabaseUrl && supabaseAnonKey) {
+    supabaseClient = createClient(supabaseUrl, supabaseAnonKey, {
         auth: {
             autoRefreshToken: true,
             persistSession: true,
@@ -20,19 +16,9 @@ function createSupabaseClient(): SupabaseClient {
     });
 }
 
-// Use a getter pattern for lazy initialization
-// This ensures the client is only created when actually accessed
-export const supabase = new Proxy({} as SupabaseClient, {
-    get(_, prop) {
-        if (!supabaseInstance) {
-            supabaseInstance = createSupabaseClient();
-        }
-        const value = (supabaseInstance as unknown as Record<string | symbol, unknown>)[prop];
-        // Bind functions to the instance to preserve 'this' context
-        if (typeof value === 'function') {
-            return value.bind(supabaseInstance);
-        }
-        return value;
+// Export the client - throws if accessed when not configured
+export const supabase: SupabaseClient = supabaseClient || (new Proxy({} as SupabaseClient, {
+    get() {
+        throw new Error('Supabase client not configured. Please set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY environment variables.');
     }
-});
-
+}));
