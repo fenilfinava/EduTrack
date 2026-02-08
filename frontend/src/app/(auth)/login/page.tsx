@@ -16,7 +16,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Github, Loader2 } from "lucide-react"
 import { apiClient } from "@/lib/api"
-import { supabase } from "@/lib/supabase"
+import { supabase, SUPABASE_URL } from "@/lib/supabase"
 
 export default function LoginPage() {
     const [isLoading, setIsLoading] = useState(false)
@@ -28,16 +28,15 @@ export default function LoginPage() {
         setError(null)
 
         try {
-            // Construct the OAuth URL directly - bypasses SDK which seems to hang
-            const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+            // Construct the OAuth URL directly - uses exported URL from supabase module
             const redirectTo = `${window.location.origin}/callback`
 
-            if (!supabaseUrl) {
+            if (!SUPABASE_URL) {
                 throw new Error('Supabase URL not configured')
             }
 
             // Direct redirect to Supabase OAuth endpoint
-            const authUrl = `${supabaseUrl}/auth/v1/authorize?provider=github&redirect_to=${encodeURIComponent(redirectTo)}`
+            const authUrl = `${SUPABASE_URL}/auth/v1/authorize?provider=github&redirect_to=${encodeURIComponent(redirectTo)}`
             window.location.href = authUrl
         } catch (err) {
             const message = err instanceof Error ? err.message : 'GitHub login failed'

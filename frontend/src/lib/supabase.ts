@@ -1,13 +1,13 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+export const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
 // Create client directly - will be null during build if env vars missing
 let supabaseClient: SupabaseClient | null = null;
 
-if (supabaseUrl && supabaseAnonKey) {
-    supabaseClient = createClient(supabaseUrl, supabaseAnonKey, {
+if (SUPABASE_URL && supabaseAnonKey) {
+    supabaseClient = createClient(SUPABASE_URL, supabaseAnonKey, {
         auth: {
             autoRefreshToken: true,
             persistSession: true,
